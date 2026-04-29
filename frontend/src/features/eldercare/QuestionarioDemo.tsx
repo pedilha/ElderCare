@@ -10,9 +10,12 @@ const USE_SSO =
   "true";
 
 async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const token = localStorage.getItem("token");
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error((await res.text()) || `HTTP ${res.status}`);

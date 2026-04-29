@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs wc *)",
+      "Bash(java -version)",
+      "Bash(docker --version)",
+      "Bash(npm --version)",
+      "Bash(./mvnw clean *)",
+      "Bash(npm install *)",
+      "Bash(timeout 15 ../mvnw spring-boot:run)",
+      "Bash(timeout 20 ./mvnw spring-boot:run)",
+      "Bash(docker-compose up *)",
+      "Bash(docker exec pi_postgres *)",
+      "Bash(./mvnw spring-boot:run *)",
+      "Bash(netstat -ano)",
+      "Bash(tasklist /FI \"PID eq 10116\")",
+      "Bash(tasklist /FI \"PID eq 6704\")",
+      "PowerShell(Get-Process | Where-Object { $_.Id -in @\\(10116, 6704\\) } | Select-Object Id, ProcessName)",
+      "PowerShell(netstat *)",
+      "Bash(docker-compose down *)",
+      "Bash(./mvnw spring-boot:run)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(curl *)",
+      "Bash(python -m json.tool)",
+      "Bash(pkill -f \"spring-boot:run\")",
+      "Bash(pkill -f \"ProjetointegradorApplication\")",
+      "Bash(git add *)"
+    ]
+  }
+}

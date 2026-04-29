@@ -4,6 +4,8 @@ import { setAuthToken } from '@/lib/http';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,13 +17,19 @@ export default function LoginForm() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // Mock de autenticação: em produção, chame a API.
-      await new Promise((r) => setTimeout(r, 500));
-      setAuthToken('demo-token');
+      const res = await fetch(`${API}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha: password }),
+      });
+      if (!res.ok) throw new Error('Credenciais inválidas');
+      const data = await res.json();
+      localStorage.setItem('token', data.token);
+      setAuthToken(data.token);
       enqueueSnackbar('Login realizado com sucesso!', { variant: 'success' });
       navigate('/home', { replace: true });
     } catch (err) {
-      enqueueSnackbar('Falha ao autenticar. Tente novamente.', { variant: 'error' });
+      enqueueSnackbar('Falha ao autenticar. Verifique e-mail e senha.', { variant: 'error' });
     } finally {
       setSubmitting(false);
     }

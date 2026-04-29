@@ -23,7 +23,6 @@ public record CriarIdosoDTO(
         @Size(max = 255)
         String email,
 
-        @NotBlank
         @Pattern(
             regexp = "^(?:\\+?55\\s?)?\\(?\\d{2}\\)?\\s?(?:9\\d{4}|\\d{4})-?\\d{4}$",
             message = "telefone deve estar no formato BR, ex.: (62) 99999-0000"

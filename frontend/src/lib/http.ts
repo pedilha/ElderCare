@@ -5,9 +5,12 @@ const http = axios.create({
   timeout: 15000,
 });
 
-// Token (se algum dia você usar JWT)
-let token: string | null = null;
-export function setAuthToken(t: string | null) { token = t; }
+let token: string | null = localStorage.getItem('token');
+export function setAuthToken(t: string | null) {
+  token = t;
+  if (t) localStorage.setItem('token', t);
+  else localStorage.removeItem('token');
+}
 
 http.interceptors.request.use((config) => {
   config.headers = config.headers || {};
