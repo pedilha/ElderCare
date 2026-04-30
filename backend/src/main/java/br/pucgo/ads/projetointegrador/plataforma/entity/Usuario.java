@@ -25,7 +25,10 @@ public class Usuario {
     
     @Column(nullable = false, unique = true, length = 150)
     private String email;
-    
+
+    @Column(name = "senha_hash", length = 255)
+    private String senhaHash;
+
     @Column(nullable = false, length = 20)
     private String telefone;
     

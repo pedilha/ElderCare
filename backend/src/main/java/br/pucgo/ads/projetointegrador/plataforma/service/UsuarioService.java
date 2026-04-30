@@ -6,6 +6,7 @@ import br.pucgo.ads.projetointegrador.plataforma.entity.Usuario;
 import br.pucgo.ads.projetointegrador.plataforma.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +17,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UsuarioService {
-    
+
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
     
     /**
      * Listar todos os usuários
@@ -102,7 +104,8 @@ public class UsuarioService {
         usuario.setDataNascimento(request.getDataNascimento());
         usuario.setTipoUsuario(request.getTipoUsuario());
         usuario.setAtivo(request.getAtivo());
-        
+        usuario.setSenhaHash(passwordEncoder.encode(request.getSenha()));
+
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
         log.info("Usuário criado com sucesso. ID: {}", usuarioSalvo.getId());
         

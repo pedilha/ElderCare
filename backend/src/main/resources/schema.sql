@@ -106,3 +106,33 @@ CREATE TABLE IF NOT EXISTS ex_item_plano (
 );
 CREATE INDEX IF NOT EXISTS idx_item_day ON ex_item_plano(day_id);
 CREATE INDEX IF NOT EXISTS idx_item_exercicio ON ex_item_plano(exercicio_id);
+
+-- =========================================================
+-- USUARIOS (tabela gerenciada pelo módulo plataforma)
+-- =========================================================
+CREATE TABLE IF NOT EXISTS usuarios (
+  id               bigserial    PRIMARY KEY,
+  nome             varchar(100) NOT NULL,
+  email            varchar(150) NOT NULL UNIQUE,
+  senha_hash       varchar(255),
+  telefone         varchar(20)  NOT NULL,
+  data_nascimento  varchar(10),
+  tipo_usuario     varchar(30)  NOT NULL,
+  ativo            boolean      NOT NULL DEFAULT true,
+  created_at       timestamptz  NOT NULL DEFAULT now(),
+  updated_at       timestamptz
+);
+
+-- =========================================================
+-- MIGRAÇÕES INCREMENTAIS (idempotentes)
+-- =========================================================
+
+-- Adiciona senha_hash se ainda não existir (usuarios antigos sem senha)
+ALTER TABLE IF EXISTS usuarios ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
+
+-- Permite salvar chave textual da pergunta sem FK obrigatória
+ALTER TABLE IF EXISTS ex_resposta_usuario ADD COLUMN IF NOT EXISTS pergunta_chave TEXT;
+
+-- Torna question_id opcional (preenchido no futuro quando perguntas
+-- forem migradas para o banco)
+ALTER TABLE IF EXISTS ex_resposta_usuario ALTER COLUMN question_id DROP NOT NULL;

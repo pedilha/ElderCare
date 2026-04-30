@@ -29,6 +29,10 @@ public class UsuarioRequestDTO {
     
     @NotNull(message = "Tipo de usuário é obrigatório")
     private Usuario.TipoUsuario tipoUsuario;
-    
+
+    @NotBlank(message = "Senha é obrigatória")
+    @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
+    private String senha;
+
     private Boolean ativo = true;
 }

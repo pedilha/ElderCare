@@ -24,7 +24,9 @@
       "Bash(python -m json.tool)",
       "Bash(pkill -f \"spring-boot:run\")",
       "Bash(pkill -f \"ProjetointegradorApplication\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }

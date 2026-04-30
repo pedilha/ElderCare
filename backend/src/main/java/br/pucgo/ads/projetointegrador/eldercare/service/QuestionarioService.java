@@ -7,6 +7,7 @@ import br.pucgo.ads.projetointegrador.eldercare.domain.ex_item_plano;
 import br.pucgo.ads.projetointegrador.eldercare.domain.ex_participante;
 import br.pucgo.ads.projetointegrador.eldercare.domain.ex_plano;
 import br.pucgo.ads.projetointegrador.eldercare.domain.ex_resposta_questionario;
+import br.pucgo.ads.projetointegrador.eldercare.domain.ex_resposta_usuario;
 import br.pucgo.ads.projetointegrador.eldercare.dto.PlanoGeradoResponse;
 import br.pucgo.ads.projetointegrador.eldercare.repository.*;
 
@@ -31,6 +32,7 @@ public class QuestionarioService {
     private final DiaPlanoRepository diaPlanoRepository;
     private final ItemPlanoRepository itemPlanoRepository;
     private final ExercicioRepository exercicioRepository;
+    private final RespostaUsuarioRepository respostaUsuarioRepository;
     private final PlanoService planoService;
 
     public QuestionarioService(IdosoRepository idosoRepository,
@@ -40,6 +42,7 @@ public class QuestionarioService {
                                DiaPlanoRepository diaPlanoRepository,
                                ItemPlanoRepository itemPlanoRepository,
                                ExercicioRepository exercicioRepository,
+                               RespostaUsuarioRepository respostaUsuarioRepository,
                                PlanoService planoService) {
         this.idosoRepository = idosoRepository;
         this.participanteRepository = participanteRepository;
@@ -48,6 +51,7 @@ public class QuestionarioService {
         this.diaPlanoRepository = diaPlanoRepository;
         this.itemPlanoRepository = itemPlanoRepository;
         this.exercicioRepository = exercicioRepository;
+        this.respostaUsuarioRepository = respostaUsuarioRepository;
         this.planoService = planoService;
     }
 
@@ -83,6 +87,9 @@ public class QuestionarioService {
 
         // Mapa códigoPergunta -> resposta
         Map<String, Object> respostasMap = extrairRespostasMap(payload);
+
+        // Persiste cada resposta individual em ex_resposta_usuario
+        persistirRespostas(respostasMap, respQ);
 
         // Pontuação global de risco (quanto MAIOR, mais risco)
         int pontuacao = calcularPontuacao(respostasMap);
@@ -122,6 +129,47 @@ public class QuestionarioService {
         ex_plano plano = criarPlanoSemanalBasico(participante, respQ, nivel, freqSemana, tempoSessaoMin);
 
         return planoService.montarPlanoGeradoResponse(plano.getId());
+    }
+
+    // =====================================================================
+    // PERSISTÊNCIA DAS RESPOSTAS INDIVIDUAIS
+    // =====================================================================
+
+    /**
+     * Salva cada par chave/valor do questionário na tabela ex_resposta_usuario.
+     * question_id fica null até as perguntas serem migradas para o banco.
+     */
+    private void persistirRespostas(Map<String, Object> respostasMap, ex_resposta_questionario respQ) {
+        List<ex_resposta_usuario> registros = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : respostasMap.entrySet()) {
+            ex_resposta_usuario ru = new ex_resposta_usuario();
+            ru.setRespostaQuestionario(respQ);
+            ru.setPerguntaChave(entry.getKey());
+
+            Object valor = entry.getValue();
+            if (valor != null) {
+                String s = valor.toString().trim();
+                ru.setOptionCode(s);
+
+                // Tenta armazenar como número quando aplicável
+                try {
+                    ru.setValueNumber(Double.parseDouble(s));
+                } catch (NumberFormatException ignored) {}
+
+                // Tenta armazenar como booleano quando aplicável
+                String sLower = s.toLowerCase(Locale.ROOT);
+                if (sLower.equals("sim") || sLower.startsWith("sim_") || sLower.equals("true")) {
+                    ru.setValueBoolean(true);
+                } else if (sLower.equals("nao") || sLower.equals("não") || sLower.equals("false")) {
+                    ru.setValueBoolean(false);
+                }
+            }
+
+            registros.add(ru);
+        }
+
+        respostaUsuarioRepository.saveAll(registros);
     }
 
     // =====================================================================

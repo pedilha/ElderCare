@@ -23,16 +23,26 @@ public class ex_resposta_usuario {
     @JoinColumn(name = "response_id")
     private ex_resposta_questionario respostaQuestionario;
 
-    @ManyToOne(optional = false)
+    // Chave textual da pergunta (ex: "cansaco_ativ_leves").
+    // Permite salvar respostas sem necessitar de ex_pergunta no banco.
+    @Column(name = "pergunta_chave")
+    private String perguntaChave;
+
+    // FK para ex_pergunta — opcional; preenchida quando as perguntas
+    // estiverem cadastradas no banco (futuro).
+    @ManyToOne(optional = true)
     @JoinColumn(name = "question_id")
     private ex_pergunta pergunta;
 
+    // Valor textual da resposta (ex: "frequente", "sim")
     @Column(name = "option_code")
     private String optionCode;
 
+    // Valor numérico quando aplicável
     @Column(name = "value_number")
     private Double valueNumber;
 
+    // Valor booleano quando aplicável (sim/não)
     @Column(name = "value_boolean")
     private Boolean valueBoolean;
 }
