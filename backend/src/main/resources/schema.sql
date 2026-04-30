@@ -133,6 +133,13 @@ ALTER TABLE IF EXISTS usuarios ADD COLUMN IF NOT EXISTS senha_hash VARCHAR(255);
 -- Permite salvar chave textual da pergunta sem FK obrigatória
 ALTER TABLE IF EXISTS ex_resposta_usuario ADD COLUMN IF NOT EXISTS pergunta_chave TEXT;
 
--- Torna question_id opcional (preenchido no futuro quando perguntas
--- forem migradas para o banco)
+-- Torna question_id opcional (preenchido quando perguntas estão no banco)
 ALTER TABLE IF EXISTS ex_resposta_usuario ALTER COLUMN question_id DROP NOT NULL;
+
+-- Slug único e categoria para ex_pergunta (suporte à API de perguntas)
+ALTER TABLE IF EXISTS ex_pergunta ADD COLUMN IF NOT EXISTS slug TEXT;
+ALTER TABLE IF EXISTS ex_pergunta ADD COLUMN IF NOT EXISTS categoria TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS uk_pergunta_slug ON ex_pergunta(slug) WHERE slug IS NOT NULL;
+
+-- Ordem explícita das opções de cada pergunta
+ALTER TABLE IF EXISTS ex_opcao_pergunta ADD COLUMN IF NOT EXISTS ordem INT;

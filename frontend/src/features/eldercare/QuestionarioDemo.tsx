@@ -23,7 +23,15 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 /* ================================================================
-   Tipos
+   Tipos da API de perguntas
+   ================================================================ */
+type ApiOpcao    = { codigo: string; rotulo: string };
+type ApiPergunta = { id: string; slug: string; enunciado: string; tipo: string; ordem: number; opcoes: ApiOpcao[] };
+type ApiCategoria = { id: string; titulo: string; emoji: string; perguntas: ApiPergunta[] };
+type ApiResponse  = { categorias: ApiCategoria[] };
+
+/* ================================================================
+   Demais tipos locais
    ================================================================ */
 type Step = "CADASTRO" | "QUESTIONARIO" | "PLANO";
 type Sexo = "MASCULINO" | "FEMININO" | "OUTRO";
@@ -64,181 +72,6 @@ type PlatformProfile = {
   gender?: string;
   phone?: string;
 };
-
-type Question = { slug: string; label: string; options: string[] };
-
-/* ================================================================
-   Mapa de labels legíveis para as opções
-   ================================================================ */
-const OPTION_LABELS: Record<string, string> = {
-  // Frequência geral
-  nunca: "Nunca",
-  raramente: "Raramente",
-  as_vezes: "Às vezes",
-  frequente: "Frequente",
-  sempre: "Sempre",
-  // Sim/Não
-  sim: "Sim",
-  nao: "Não",
-  sim_controlada: "Sim, controlada",
-  sim_nao_controlada: "Sim, não controlada",
-  sim_ocasional: "Sim, ocasional",
-  sim_diario: "Sim, diariamente",
-  // Quantidade
-  "1x": "1×/semana",
-  "2x": "2×/semana",
-  "3x": "3×/semana",
-  "4x_ou_mais": "4×/semana ou mais",
-  // Níveis
-  baixo: "Baixo",
-  medio: "Médio",
-  alto: "Alto",
-  // Quedas
-  nenhuma: "Nenhuma",
-  "1": "1 vez",
-  "2oumais": "2 ou mais",
-  "1oumais": "1 ou mais",
-  // Levantar
-  dificuldade: "Com dificuldade",
-  nao_consegue: "Não consigo",
-  // Equilíbrio
-  "10oumais": "≥ 10 seg",
-  "5a9": "5 a 9 seg",
-  menos5: "< 5 seg",
-  // Flexibilidade
-  com_dificuldade: "Com dificuldade",
-  // Hábitos
-  "1a2_semana": "1–2×/semana",
-  "3oumais_semana": "3+/semana",
-  diario: "Diariamente",
-  boa: "Boa",
-  regular: "Regular",
-  ruim: "Ruim",
-  // Ar livre
-  "1x_semana": "1×/semana",
-  "2a3_semana": "2–3×/semana",
-  "4oumais_semana": "4+/semana",
-  // Social
-  mensal: "Mensal",
-  semanal: "Semanal",
-  // Objetivos
-  mobilidade: "Mobilidade",
-  forca: "Força",
-  equilibrio: "Equilíbrio",
-  relaxar: "Relaxar",
-  emagrecer: "Emagrecer",
-  // Preferências
-  individual: "Individual",
-  grupo: "Em grupo",
-  indiferente: "Indiferente",
-  leve: "Leve",
-  moderada: "Moderada",
-  // Local
-  casa: "Em casa",
-  academia: "Academia",
-  parque: "Parque",
-  // Equipamentos
-  nenhum: "Nenhum",
-  halteres: "Halteres",
-  elastico: "Elástico",
-  halteres_e_elastico: "Halteres + Elástico",
-  outros: "Outros",
-  // Dias
-  "2": "2 dias",
-  "3": "3 dias",
-  "4oumais": "4 ou mais",
-  // Tempo
-  "15": "15 min",
-  "20": "20 min",
-  "30": "30 min",
-  "45": "45 min",
-  "60": "60 min",
-  // Horário
-  manha: "Manhã",
-  tarde: "Tarde",
-  noite: "Noite",
-  // Coordenação
-  leve_coord: "Leve",
-  moderada_coord: "Moderada",
-  grave: "Grave",
-  leve: "Leve",
-};
-
-function label(opt: string): string {
-  return OPTION_LABELS[opt] ?? opt.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-/* ================================================================
-   Dados das perguntas
-   ================================================================ */
-const QUESTIONS: Question[] = [
-  { slug: "cansaco_ativ_leves",         label: "Você sente cansaço em atividades leves?",         options: ["nunca", "as_vezes", "frequente"] },
-  { slug: "adl_sem_ajuda",              label: "Realiza atividades do dia a dia sem ajuda?",       options: ["sim", "as_vezes", "nao"] },
-  { slug: "atividade_freq_semana",      label: "Frequência de atividade física por semana",        options: ["nunca", "1x", "2x", "3x", "4x_ou_mais"] },
-  { slug: "dores_articulares",          label: "Dores musculares/articulares com frequência?",     options: ["nao", "as_vezes", "frequente"] },
-  { slug: "mobilidade_nivel",           label: "Como você avalia sua mobilidade?",                 options: ["baixo", "medio", "alto"] },
-
-  { slug: "hipertensao",                label: "Tem hipertensão?",                                 options: ["nao", "sim_controlada", "sim_nao_controlada"] },
-  { slug: "problema_cardiaco",          label: "Já teve problema cardíaco?",                       options: ["nao", "sim"] },
-  { slug: "falta_ar_esforco_leve",      label: "Sente falta de ar em esforço leve?",              options: ["nunca", "as_vezes", "frequente"] },
-  { slug: "medicacao_coracao_pressao",  label: "Usa medicação para coração/pressão?",             options: ["nao", "sim"] },
-  { slug: "recomendacao_limitar_esforco", label: "Algum médico recomendou limitar esforço?",      options: ["nao", "sim"] },
-
-  { slug: "inseguranca_caminhar",       label: "Sente insegurança ao caminhar?",                  options: ["nao", "as_vezes", "sim"] },
-  { slug: "quedas_ultimo_ano",          label: "Quantas quedas no último ano?",                   options: ["nenhuma", "1", "2oumais"] },
-  { slug: "levantar_sem_apoio",         label: "Consegue levantar da cadeira sem apoio?",         options: ["sim", "dificuldade", "nao_consegue"] },
-  { slug: "equilibrio_unipodal",        label: "Equilíbrio em um pé (segundos)",                  options: ["10oumais", "5a9", "menos5"] },
-  { slug: "dores_membros_tronco",       label: "Dores em membros ou tronco?",                     options: ["nao", "as_vezes", "frequente"] },
-
-  { slug: "tocar_pes_sem_dobrar",       label: "Toca os pés sem dobrar os joelhos?",             options: ["sim", "com_dificuldade", "nao"] },
-  { slug: "rigidez_ao_acordar",         label: "Sente rigidez ao acordar?",                       options: ["nao", "as_vezes", "frequente"] },
-  { slug: "alonga_regularmente",        label: "Faz alongamento regularmente?",                   options: ["sim", "as_vezes", "nao"] },
-  { slug: "dificuldade_coordenacao",    label: "Dificuldade de coordenação motora?",              options: ["nao", "leve", "moderada", "grave"] },
-  { slug: "quer_melhorar_flexibilidade", label: "Deseja melhorar a flexibilidade?",               options: ["sim", "nao"] },
-
-  { slug: "fuma",                       label: "Fuma?",                                            options: ["nao", "sim_ocasional", "sim_diario"] },
-  { slug: "alcool_frequencia",          label: "Com que frequência consome álcool?",              options: ["nao", "1a2_semana", "3oumais_semana", "diario"] },
-  { slug: "alimentacao_avaliacao",      label: "Como avalia sua alimentação?",                    options: ["boa", "regular", "ruim"] },
-  { slug: "dorme_bem",                  label: "Dorme bem?",                                       options: ["sim", "as_vezes", "nao"] },
-  { slug: "ativ_ao_ar_livre",           label: "Faz atividades ao ar livre?",                     options: ["nunca", "1x_semana", "2a3_semana", "4oumais_semana"] },
-
-  { slug: "solidao_desmotivacao",       label: "Sente solidão ou desmotivação?",                 options: ["nunca", "as_vezes", "frequente"] },
-  { slug: "participa_grupos_sociais",   label: "Participa de grupos sociais?",                   options: ["nunca", "mensal", "semanal"] },
-  { slug: "estresse_ansiedade",         label: "Sente estresse ou ansiedade?",                   options: ["nunca", "as_vezes", "frequente"] },
-  { slug: "diag_depressao",             label: "Tem diagnóstico de depressão?",                  options: ["nao", "sim"] },
-  { slug: "prazer_exercicio",           label: "Sente prazer em se exercitar?",                  options: ["sim", "as_vezes", "nao"] },
-
-  { slug: "objetivo_principal",         label: "Qual o seu objetivo principal?",                  options: ["mobilidade", "forca", "equilibrio", "relaxar", "emagrecer"] },
-  { slug: "preferencia_social",         label: "Prefere treinar sozinho ou em grupo?",           options: ["individual", "grupo", "indiferente"] },
-  { slug: "intensidade_preferida",      label: "Qual intensidade prefere?",                       options: ["leve", "moderada"] },
-  { slug: "gosta_musica",               label: "Gosta de música durante o treino?",              options: ["sim", "nao"] },
-  { slug: "local_preferido",            label: "Local preferido para exercícios",                 options: ["casa", "academia", "parque"] },
-
-  { slug: "dias_por_semana",            label: "Quantos dias por semana pode treinar?",           options: ["1", "2", "3", "4oumais"] },
-  { slug: "tempo_por_dia",              label: "Quanto tempo disponível por dia?",               options: ["15", "20", "30", "45", "60"] },
-  { slug: "horario_preferido",          label: "Horário preferido",                               options: ["manha", "tarde", "noite"] },
-  { slug: "equipamentos",               label: "Equipamentos disponíveis em casa",               options: ["nenhum", "halteres", "elastico", "halteres_e_elastico", "outros"] },
-  { slug: "acomp_medico_ou_fisio",      label: "Tem acompanhamento médico ou de fisioterapeuta?", options: ["nao", "sim"] },
-];
-
-const CATEGORIES = [
-  { id: "condicao",  title: "Condição física", emoji: "🧩",
-    items: ["cansaco_ativ_leves","adl_sem_ajuda","atividade_freq_semana","dores_articulares","mobilidade_nivel"] },
-  { id: "cardio",    title: "Saúde cardiovascular", emoji: "💓",
-    items: ["hipertensao","problema_cardiaco","falta_ar_esforco_leve","medicacao_coracao_pressao","recomendacao_limitar_esforco"] },
-  { id: "forca",     title: "Força e equilíbrio", emoji: "🏃",
-    items: ["inseguranca_caminhar","quedas_ultimo_ano","levantar_sem_apoio","equilibrio_unipodal","dores_membros_tronco"] },
-  { id: "flex",      title: "Flexibilidade", emoji: "🧘",
-    items: ["tocar_pes_sem_dobrar","rigidez_ao_acordar","alonga_regularmente","dificuldade_coordenacao","quer_melhorar_flexibilidade"] },
-  { id: "habitos",   title: "Hábitos de vida", emoji: "🍎",
-    items: ["fuma","alcool_frequencia","alimentacao_avaliacao","dorme_bem","ativ_ao_ar_livre"] },
-  { id: "mental",    title: "Saúde mental", emoji: "🧠",
-    items: ["solidao_desmotivacao","participa_grupos_sociais","estresse_ansiedade","diag_depressao","prazer_exercicio"] },
-  { id: "prefer",    title: "Objetivos", emoji: "🎯",
-    items: ["objetivo_principal","preferencia_social","intensidade_preferida","gosta_musica","local_preferido"] },
-  { id: "rotina",    title: "Rotina e disponibilidade", emoji: "⏱",
-    items: ["dias_por_semana","tempo_por_dia","horario_preferido","equipamentos","acomp_medico_ou_fisio"] },
-];
 
 /* ================================================================
    Utilitários
@@ -339,32 +172,53 @@ function normalizePlano(raw: any): PlanoExercicio {
    COMPONENTE PRINCIPAL
    ================================================================ */
 export default function QuestionarioDemo() {
-  const [step, setStep]     = useState<Step>("CADASTRO");
-  const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
-  const [idosoId, setIdosoId] = useState<number | null>(null);
-  const [plano, setPlano]   = useState<PlanoExercicio | null>(null);
+  const [step, setStep]         = useState<Step>("CADASTRO");
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const [idosoId, setIdosoId]   = useState<number | null>(null);
+  const [plano, setPlano]       = useState<PlanoExercicio | null>(null);
   const [catIndex, setCatIndex] = useState(0);
 
-  // cadastro
-  const [nome, setNome]                 = useState("");
+  // Dados do questionário vindos da API
+  const [categories, setCategories]         = useState<ApiCategoria[]>([]);
+  const [loadingPerguntas, setLoadingPerguntas] = useState(true);
+
+  // Cadastro
+  const [nome, setNome]                     = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
-  const [sexo, setSexo]                 = useState<Sexo>("OUTRO");
-  const [email, setEmail]               = useState("");
-  const [telefone, setTelefone]         = useState("");
+  const [sexo, setSexo]                     = useState<Sexo>("OUTRO");
+  const [email, setEmail]                   = useState("");
+  const [telefone, setTelefone]             = useState("");
 
-  // respostas
-  const initial = useMemo(() => {
-    const o: Record<string, string> = {};
-    QUESTIONS.forEach((q) => (o[q.slug] = q.options[0]));
-    return o;
-  }, []);
-  const [answers, setAnswers] = useState<Record<string, string>>(initial);
+  // Respostas
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
-  const bySlug = useMemo(() => {
-    const m: Record<string, Question> = {};
-    QUESTIONS.forEach((q) => (m[q.slug] = q));
-    return m;
+  /* ------------------------------------------------------------
+     Busca perguntas do backend ao montar
+     ------------------------------------------------------------ */
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${BASE}/api/eldercare/questionario/perguntas`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: ApiResponse = await res.json();
+        const cats = data.categorias ?? [];
+        setCategories(cats);
+        // Inicializa answers com a primeira opção de cada pergunta
+        const initial: Record<string, string> = {};
+        for (const cat of cats) {
+          for (const q of cat.perguntas) {
+            if (q.opcoes.length > 0) initial[q.slug] = q.opcoes[0].codigo;
+          }
+        }
+        setAnswers(initial);
+      } catch (e) {
+        console.error("Erro ao carregar perguntas:", e);
+        setError("Não foi possível carregar o questionário. Verifique a conexão com o servidor.");
+      } finally {
+        setLoadingPerguntas(false);
+      }
+    })();
   }, []);
 
   /* SSO */
@@ -416,8 +270,8 @@ export default function QuestionarioDemo() {
     } finally { setLoading(false); }
   }
 
-  const totalCats = CATEGORIES.length;
-  const current   = CATEGORIES[catIndex];
+  const totalCats = categories.length;
+  const current   = categories[catIndex];
   const isLast    = catIndex === totalCats - 1;
 
   const planoOrdenado = useMemo(() => {
@@ -439,7 +293,7 @@ export default function QuestionarioDemo() {
 
   /* Rótulo do step */
   const stepLabel = step === "CADASTRO" ? "Cadastro"
-    : step === "QUESTIONARIO" ? `${current.title} · ${catIndex + 1}/${totalCats}`
+    : step === "QUESTIONARIO" ? `${current?.titulo ?? "Carregando…"} · ${catIndex + 1}/${totalCats || "?"}`
     : "Plano gerado";
 
   const stepIndex = step === "CADASTRO" ? 0 : step === "QUESTIONARIO" ? 1 : 2;
@@ -461,7 +315,7 @@ export default function QuestionarioDemo() {
         </div>
         <div className="qc-topbar__label">
           <span>{stepLabel}</span>
-          {step === "QUESTIONARIO" && (
+          {step === "QUESTIONARIO" && totalCats > 0 && (
             <span style={{ color: "var(--ec-muted)", fontWeight: 400, fontSize: 12 }}>
               {Math.round((catIndex / (totalCats - 1)) * 100)}% concluído
             </span>
@@ -545,7 +399,9 @@ export default function QuestionarioDemo() {
               </div>
 
               <div className="qc-field">
-                <label className="qc-label" htmlFor="tel">Telefone <span style={{ fontWeight: 400, color: "var(--ec-muted)" }}>(opcional)</span></label>
+                <label className="qc-label" htmlFor="tel">
+                  Telefone <span style={{ fontWeight: 400, color: "var(--ec-muted)" }}>(opcional)</span>
+                </label>
                 <input
                   id="tel"
                   className="qc-input"
@@ -557,7 +413,6 @@ export default function QuestionarioDemo() {
                 />
               </div>
 
-              {/* ação inline para que o submit do form funcione */}
               <button className="btn btn-primary" type="submit" disabled={loading} style={{ marginTop: 4 }}>
                 {loading ? "Salvando…" : "Continuar →"}
               </button>
@@ -568,46 +423,55 @@ export default function QuestionarioDemo() {
         {/* ---- QUESTIONÁRIO -------------------------------------- */}
         {step === "QUESTIONARIO" && (
           <div className="qc-card">
-            {/* Progresso de categorias */}
-            <div className="qc-cat-progress">
-              {CATEGORIES.map((c, i) => (
-                <div
-                  key={c.id}
-                  className={`qc-cat-pip ${i < catIndex ? "done" : i === catIndex ? "active" : ""}`}
-                />
-              ))}
-            </div>
-
-            {/* Cabeçalho da categoria */}
-            <div className="qc-cat-header">
-              <div className="qc-cat-emoji">{current.emoji}</div>
-              <h3 className="qc-cat-title">{current.title}</h3>
-              <span className="qc-cat-count">{catIndex + 1} / {totalCats}</span>
-            </div>
-
-            {/* Perguntas */}
-            {current.items.map((slug) => {
-              const q = bySlug[slug];
-              if (!q) return null;
-              const isLongOptions = q.options.some((o) => label(o).length > 12) || q.options.length > 4;
-              return (
-                <div key={slug} className="qc-question">
-                  <div className="qc-question__label">{q.label}</div>
-                  <div className="qc-options">
-                    {q.options.map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        className={`qc-option${answers[q.slug] === opt ? " selected" : ""}${isLongOptions ? " full-width" : ""}`}
-                        onClick={() => setAnswers((a) => ({ ...a, [slug]: opt }))}
-                      >
-                        {label(opt)}
-                      </button>
-                    ))}
-                  </div>
+            {/* Loading das perguntas */}
+            {loadingPerguntas ? (
+              <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--ec-muted)" }}>
+                Carregando questionário…
+              </div>
+            ) : (
+              <>
+                {/* Progresso de categorias */}
+                <div className="qc-cat-progress">
+                  {categories.map((c, i) => (
+                    <div
+                      key={c.id}
+                      className={`qc-cat-pip ${i < catIndex ? "done" : i === catIndex ? "active" : ""}`}
+                    />
+                  ))}
                 </div>
-              );
-            })}
+
+                {/* Cabeçalho da categoria */}
+                {current && (
+                  <div className="qc-cat-header">
+                    <div className="qc-cat-emoji">{current.emoji}</div>
+                    <h3 className="qc-cat-title">{current.titulo}</h3>
+                    <span className="qc-cat-count">{catIndex + 1} / {totalCats}</span>
+                  </div>
+                )}
+
+                {/* Perguntas */}
+                {current?.perguntas.map((q) => {
+                  const isLongOptions = q.opcoes.some((o) => o.rotulo.length > 12) || q.opcoes.length > 4;
+                  return (
+                    <div key={q.slug} className="qc-question">
+                      <div className="qc-question__label">{q.enunciado}</div>
+                      <div className="qc-options">
+                        {q.opcoes.map((opt) => (
+                          <button
+                            key={opt.codigo}
+                            type="button"
+                            className={`qc-option${answers[q.slug] === opt.codigo ? " selected" : ""}${isLongOptions ? " full-width" : ""}`}
+                            onClick={() => setAnswers((a) => ({ ...a, [q.slug]: opt.codigo }))}
+                          >
+                            {opt.rotulo}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
         )}
 
@@ -625,9 +489,14 @@ export default function QuestionarioDemo() {
 
             {/* Chips do idoso */}
             <div className="plan-info-row">
-              {nome    && <div className="plan-info-chip">👤 {nome}</div>}
-              {idade   !== null && <div className="plan-info-chip">🎂 {idade} anos</div>}
-              {sexo    && <div className="plan-info-chip">{sexo === "MASCULINO" ? "♂" : sexo === "FEMININO" ? "♀" : "⚥"} {sexo.charAt(0) + sexo.slice(1).toLowerCase()}</div>}
+              {nome  && <div className="plan-info-chip">👤 {nome}</div>}
+              {idade !== null && <div className="plan-info-chip">🎂 {idade} anos</div>}
+              {sexo  && (
+                <div className="plan-info-chip">
+                  {sexo === "MASCULINO" ? "♂" : sexo === "FEMININO" ? "♀" : "⚥"}{" "}
+                  {sexo.charAt(0) + sexo.slice(1).toLowerCase()}
+                </div>
+              )}
             </div>
 
             {/* Stats */}
@@ -646,7 +515,10 @@ export default function QuestionarioDemo() {
               </div>
               <div className="plan-stat">
                 <div className="plan-stat__label">Total/semana</div>
-                <div className="plan-stat__value">{planoOrdenado.diasPorSemana * planoOrdenado.minutosPorDia}<span className="plan-stat__unit"> min</span></div>
+                <div className="plan-stat__value">
+                  {planoOrdenado.diasPorSemana * planoOrdenado.minutosPorDia}
+                  <span className="plan-stat__unit"> min</span>
+                </div>
               </div>
             </div>
 
@@ -698,7 +570,7 @@ export default function QuestionarioDemo() {
             <button
               className="btn btn-ghost"
               onClick={() => catIndex === 0 ? setStep("CADASTRO") : setCatIndex((i) => i - 1)}
-              disabled={loading}
+              disabled={loading || loadingPerguntas}
             >
               ← Voltar
             </button>
@@ -707,7 +579,7 @@ export default function QuestionarioDemo() {
               <button
                 className="btn btn-primary"
                 onClick={() => setCatIndex((i) => i + 1)}
-                disabled={loading}
+                disabled={loading || loadingPerguntas}
               >
                 Continuar →
               </button>
@@ -715,7 +587,7 @@ export default function QuestionarioDemo() {
               <button
                 className="btn btn-primary"
                 onClick={handleGerarPlano}
-                disabled={loading}
+                disabled={loading || loadingPerguntas}
               >
                 {loading ? "Gerando…" : "✨ Gerar Plano"}
               </button>

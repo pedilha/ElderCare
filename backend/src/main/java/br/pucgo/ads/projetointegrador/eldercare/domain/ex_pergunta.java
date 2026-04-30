@@ -25,4 +25,12 @@ public class ex_pergunta {
     private String enunciado;
 
     private String tipo; // ex: "texto", "opcao", "numero"
+
+    /** Chave textual única usada nas respostas (ex: "cansaco_ativ_leves") */
+    @Column(unique = true)
+    private String slug;
+
+    /** Categoria a que pertence (ex: "condicao", "cardio") */
+    @Column
+    private String categoria;
 }

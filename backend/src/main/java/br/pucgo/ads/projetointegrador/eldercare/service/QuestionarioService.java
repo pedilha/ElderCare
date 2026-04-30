@@ -10,6 +10,7 @@ import br.pucgo.ads.projetointegrador.eldercare.domain.ex_resposta_questionario;
 import br.pucgo.ads.projetointegrador.eldercare.domain.ex_resposta_usuario;
 import br.pucgo.ads.projetointegrador.eldercare.dto.PlanoGeradoResponse;
 import br.pucgo.ads.projetointegrador.eldercare.repository.*;
+import br.pucgo.ads.projetointegrador.eldercare.domain.ex_pergunta;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class QuestionarioService {
     private final ItemPlanoRepository itemPlanoRepository;
     private final ExercicioRepository exercicioRepository;
     private final RespostaUsuarioRepository respostaUsuarioRepository;
+    private final PerguntaRepository perguntaRepository;
     private final PlanoService planoService;
 
     public QuestionarioService(IdosoRepository idosoRepository,
@@ -43,6 +45,7 @@ public class QuestionarioService {
                                ItemPlanoRepository itemPlanoRepository,
                                ExercicioRepository exercicioRepository,
                                RespostaUsuarioRepository respostaUsuarioRepository,
+                               PerguntaRepository perguntaRepository,
                                PlanoService planoService) {
         this.idosoRepository = idosoRepository;
         this.participanteRepository = participanteRepository;
@@ -52,6 +55,7 @@ public class QuestionarioService {
         this.itemPlanoRepository = itemPlanoRepository;
         this.exercicioRepository = exercicioRepository;
         this.respostaUsuarioRepository = respostaUsuarioRepository;
+        this.perguntaRepository = perguntaRepository;
         this.planoService = planoService;
     }
 
@@ -146,6 +150,9 @@ public class QuestionarioService {
             ex_resposta_usuario ru = new ex_resposta_usuario();
             ru.setRespostaQuestionario(respQ);
             ru.setPerguntaChave(entry.getKey());
+
+            // Vincula à pergunta do banco quando disponível (completa question_id)
+            perguntaRepository.findBySlug(entry.getKey()).ifPresent(ru::setPergunta);
 
             Object valor = entry.getValue();
             if (valor != null) {

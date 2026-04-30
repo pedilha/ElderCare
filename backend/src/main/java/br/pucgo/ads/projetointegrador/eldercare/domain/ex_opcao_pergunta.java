@@ -33,6 +33,10 @@ public class ex_opcao_pergunta {
     @Column(nullable = false)
     private String rotulo;   // ex.: "Nunca", "Às vezes", "Sempre"
 
+    /** Posição de exibição dentro da pergunta (1, 2, 3…) */
+    @Column
+    private Integer ordem;
+
     @Column(name = "created_at")
     private OffsetDateTime createdAt = OffsetDateTime.now();
 }
